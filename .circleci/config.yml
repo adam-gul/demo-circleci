@@ -1,38 +1,57 @@
+version: 2.1
 
 jobs:
- build:
-   docker:
-     - image: cimg/python:3.8
-   steps:
-     - checkout
-     - run: echo "🔧 Building the application..."
+  build:
+    docker:
+      - image: cimg/python:3.8
+    steps:
+      - checkout
+      - run: echo "🔧 Building..."
 
- test:
-   docker:
-     - image: cimg/python:3.8
-   steps:
-     - run: echo "🧪 Running tests..."
+  test:
+    docker:
+      - image: cimg/python:3.8
+    steps:
+      - checkout
+      - run:
+          name: 🧪 Running tests
+          command: |
+            # Your test command here
+            # For demonstration, this fails if a file 'fail_tests' exists
+            exit 0 
 
- deploy:
-   docker:
-     - image: cimg/python:3.8
-   steps:
-     - run: echo "🚀 Deploying the application..."
-
+  deploy:
+    docker:
+      - image: cimg/python:3.8
+    steps:
+      - run: echo "🚀 Deploying the application..."
 
 workflows:
- version: 2
- build-test-deploy:
-   jobs:
-     - build
-     - test:
-         requires:
-           - build
-     - rerunFailedTests: # <<< A job that will require manual approval in the CircleCI web application.
-         type: approval # This key-value pair will set your workflow to a status of "Needs Approval"
-         requires: # We only run the "hold" job when test has succeeded
-           - test:
-              - failed
-     - deploy:
-         requires:
-           - rerunFailedTests
+  build-test-deploy:
+    jobs:
+      - build
+      - test:
+          requires:
+            - build
+      
+      # PATH 1: Automatic Deploy (Only if test passes)
+      - deploy:
+          name: automatic-deploy
+          requires:
+            - test
+
+      # PATH 2: Manual Override (Only if you want to bypass/rerun after checking failure)
+      # Note: In CircleCI, you usually "Rerun failed tests" from the UI.
+      # But if you want a manual 'gate' to deploy despite failures:
+      - rerunFailedTests:
+          type: approval
+          requires:
+            - build # We require build, so this button is available regardless of test outcome
+          filters:
+            branches:
+              only: main # Optional: only allow overrides on main
+
+      - deploy:
+          name: manual-override-deploy
+          requires:
+            - rerunFailedTests
