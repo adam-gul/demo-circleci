@@ -18,7 +18,7 @@ jobs:
           command: |
             # Your test command here
             # For demonstration, this fails if a file 'fail_tests' exists
-            exit 0 
+            exit 1 
 
   deploy:
     docker:
