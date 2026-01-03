@@ -47,9 +47,9 @@ workflows:
           type: approval
           requires:
             - build # We require build, so this button is available regardless of test outcome
-          filters:
-            branches:
-              only: main # Optional: only allow overrides on main
+          # filters:
+          #   branches:
+          #     only: main # Optional: only allow overrides on main
 
       - deploy:
           name: manual-override-deploy
